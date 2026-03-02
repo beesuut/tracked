@@ -1,0 +1,504 @@
+/* ─── VARIABLES ─────────────────────────────────────────────*/
+:root {
+  --bg:        #080808;
+  --surface:   #111111;
+  --surface2:  #1a1a1a;
+  --border:    #222222;
+  --green:     #1DB954;
+  --green-dim: rgba(29, 185, 84, 0.15);
+  --text:      #f0ede8;
+  --muted:     #666666;
+  --gold:      #f5c842;
+}
+
+/* ─── RESET & BASE ──────────────────────────────────────────*/
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background:  var(--bg);
+  color:       var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height:  100vh;
+  overflow-x:  hidden;
+}
+
+/* ─── LOADING SCREEN ────────────────────────────────────────*/
+#loading-screen {
+  min-height:      100vh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  flex-direction:  column;
+  gap:             1.5rem;
+}
+
+.loading-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size:   3rem;
+  letter-spacing: -0.02em;
+}
+
+.loading-logo span { color: var(--green); font-style: italic; }
+
+.loading-bar {
+  width:    200px;
+  height:   2px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-bar::after {
+  content:    '';
+  position:   absolute;
+  top: 0; left: -50%;
+  width:      50%;
+  height:     100%;
+  background: var(--green);
+  animation:  loading 1.2s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0%   { left: -50%; }
+  100% { left: 100%; }
+}
+
+/* ─── LOGIN SCREEN ──────────────────────────────────────────*/
+#login-screen {
+  min-height:      100vh;
+  display:         none;
+  align-items:     center;
+  justify-content: center;
+  padding:         2rem;
+  flex-direction:  column;
+}
+
+.login-card {
+  max-width: 480px;
+  width:     100%;
+  text-align: center;
+}
+
+.login-logo {
+  font-family:    'DM Serif Display', serif;
+  font-size:      clamp(3.5rem, 10vw, 6rem);
+  line-height:    0.9;
+  letter-spacing: -0.02em;
+  margin-bottom:  1rem;
+}
+
+.login-logo span { color: var(--green); font-style: italic; }
+
+.login-tagline {
+  font-size:      0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color:          var(--muted);
+  margin-bottom:  3rem;
+}
+
+.btn-login {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             0.75rem;
+  background:      var(--green);
+  color:           #000;
+  border:          none;
+  border-radius:   2px;
+  font-family:     'DM Mono', monospace;
+  font-size:       0.9rem;
+  font-weight:     500;
+  letter-spacing:  0.05em;
+  padding:         1rem 2rem;
+  cursor:          pointer;
+  transition:      all 0.2s;
+}
+
+.btn-login:hover { background: #1ed760; transform: translateY(-2px); }
+
+.login-note {
+  font-size:    0.65rem;
+  color:        var(--muted);
+  margin-top:   1.5rem;
+  line-height:  1.8;
+}
+
+/* ─── DASHBOARD ─────────────────────────────────────────────*/
+#dashboard { display: none; }
+
+/* ─── HEADER ────────────────────────────────────────────────*/
+.app-header {
+  border-bottom:   1px solid var(--border);
+  padding:         1.25rem 2rem;
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  position:        sticky;
+  top:             0;
+  background:      rgba(8, 8, 8, 0.95);
+  backdrop-filter: blur(12px);
+  z-index:         100;
+}
+
+.app-logo {
+  font-family:    'DM Serif Display', serif;
+  font-size:      1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.app-logo span { color: var(--green); font-style: italic; }
+
+.header-right {
+  display:     flex;
+  align-items: center;
+  gap:         1rem;
+}
+
+.user-info {
+  display:     flex;
+  align-items: center;
+  gap:         0.6rem;
+  font-size:   0.75rem;
+  color:       var(--muted);
+}
+
+.user-avatar {
+  width:        28px;
+  height:       28px;
+  border-radius: 50%;
+  display:      none;
+  object-fit:   cover;
+  border:       1px solid var(--border);
+}
+
+.btn-logout {
+  background:   none;
+  border:       1px solid var(--border);
+  color:        var(--muted);
+  font-family:  'DM Mono', monospace;
+  font-size:    0.65rem;
+  padding:      4px 10px;
+  cursor:       pointer;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  transition:   all 0.2s;
+}
+
+.btn-logout:hover { border-color: var(--text); color: var(--text); }
+
+/* ─── TIME RANGE TABS ───────────────────────────────────────*/
+.time-tabs {
+  padding:       1.5rem 2rem 0;
+  display:       flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.time-tab {
+  background:      none;
+  border:          none;
+  color:           var(--muted);
+  font-family:     'DM Mono', monospace;
+  font-size:       0.72rem;
+  letter-spacing:  0.08em;
+  text-transform:  uppercase;
+  padding:         0.6rem 1.25rem;
+  cursor:          pointer;
+  border-bottom:   2px solid transparent;
+  margin-bottom:   -1px;
+  transition:      all 0.2s;
+}
+
+.time-tab:hover  { color: var(--text); }
+.time-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+/* ─── CONTENT AREA ──────────────────────────────────────────*/
+.content {
+  padding:    2rem;
+  max-width:  1200px;
+  margin:     0 auto;
+}
+
+/* ─── NOW PLAYING ───────────────────────────────────────────*/
+#now-playing-bar {
+  display:     none;
+  align-items: center;
+  gap:         1rem;
+  padding:     0.75rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background:  var(--green-dim);
+  font-size:   0.75rem;
+}
+
+.np-label {
+  font-size:      0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color:          var(--green);
+  white-space:    nowrap;
+}
+
+.np-art {
+  width:         32px;
+  height:        32px;
+  object-fit:    cover;
+  border-radius: 1px;
+}
+
+.np-track { font-weight: 500; }
+.np-artist { color: var(--muted); }
+
+/* ─── STATS STRIP ───────────────────────────────────────────*/
+.stats-strip {
+  display:    grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap:        1px;
+  background: var(--border);
+  border:     1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.stat-cell {
+  background: var(--surface);
+  padding:    1.25rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size:   2rem;
+  color:       var(--green);
+  display:     block;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size:      0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color:          var(--muted);
+}
+
+/* ─── SECTION HEADERS ───────────────────────────────────────*/
+.section-header {
+  display:     flex;
+  align-items: baseline;
+  gap:         1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-title {
+  font-family:    'DM Serif Display', serif;
+  font-size:      1.75rem;
+  letter-spacing: -0.01em;
+}
+
+.section-count {
+  font-size:      0.65rem;
+  letter-spacing: 0.15em;
+  color:          var(--muted);
+  text-transform: uppercase;
+}
+
+/* ─── ARTISTS GRID ──────────────────────────────────────────*/
+.artists-grid {
+  display:    grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap:        1px;
+  background: var(--border);
+  border:     1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.artist-card {
+  background: var(--surface);
+  position:   relative;
+  overflow:   hidden;
+  aspect-ratio: 1;
+}
+
+.artist-card img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  transition: transform 0.4s ease;
+  filter:     grayscale(20%);
+}
+
+.artist-card:hover img { transform: scale(1.05); filter: grayscale(0%); }
+
+.artist-overlay {
+  position:       absolute;
+  inset:          0;
+  background:     linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 60%);
+  display:        flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding:        0.75rem;
+}
+
+.artist-rank  { font-size: 0.6rem; letter-spacing: 0.15em; color: var(--green); margin-bottom: 0.15rem; text-transform: uppercase; }
+.artist-name  { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 0.8rem; line-height: 1.2; }
+.artist-plays { font-size: 0.6rem; color: rgba(240,237,232,0.5); margin-top: 0.15rem; }
+
+.artist-card.rank-1 .artist-rank { color: var(--gold); }
+.artist-card.rank-2 .artist-rank { color: #c0c0c0; }
+.artist-card.rank-3 .artist-rank { color: #cd7f32; }
+
+/* ─── TRACKS LIST ───────────────────────────────────────────*/
+.tracks-list {
+  border:        1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.track-item {
+  display:     grid;
+  grid-template-columns: 2.5rem 3rem 1fr auto;
+  align-items: center;
+  gap:         1rem;
+  padding:     0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background:  var(--surface);
+  transition:  background 0.15s;
+}
+
+.track-item:last-child { border-bottom: none; }
+.track-item:hover      { background: var(--surface2); }
+
+.track-rank {
+  font-family: 'DM Serif Display', serif;
+  font-size:   1.2rem;
+  color:       var(--muted);
+  text-align:  right;
+  line-height: 1;
+}
+
+.track-item.rank-1 .track-rank { color: var(--gold); }
+.track-item.rank-2 .track-rank { color: #c0c0c0; }
+.track-item.rank-3 .track-rank { color: #cd7f32; }
+
+.track-art {
+  width:         3rem;
+  height:        3rem;
+  object-fit:    cover;
+  border-radius: 1px;
+  display:       block;
+}
+
+.track-info    { min-width: 0; }
+.track-name    { font-weight: 500; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-artist  { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-plays   { font-size: 0.7rem; color: var(--muted); white-space: nowrap; text-align: right; }
+
+/* ─── RECENT PLAYS ──────────────────────────────────────────*/
+.recent-grid {
+  display:    grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap:        1px;
+  background: var(--border);
+  border:     1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.recent-card {
+  background: var(--surface);
+  padding:    0.75rem;
+  display:    flex;
+  gap:        0.75rem;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.recent-card:hover { background: var(--surface2); }
+
+.recent-art {
+  width:         2.5rem;
+  height:        2.5rem;
+  object-fit:    cover;
+  flex-shrink:   0;
+  border-radius: 1px;
+}
+
+.recent-info   { min-width: 0; }
+.recent-name   { font-weight: 500; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-artist { font-size: 0.65rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-time   { font-size: 0.6rem; color: var(--green); margin-top: 2px; }
+
+/* ─── OVER TIME CHART ───────────────────────────────────────*/
+.chart-container {
+  background:    var(--surface);
+  border:        1px solid var(--border);
+  padding:       1.5rem;
+  margin-bottom: 2.5rem;
+  position:      relative;
+  height:        200px;
+}
+
+.chart-bars {
+  display:     flex;
+  align-items: flex-end;
+  height:      100%;
+  gap:         2px;
+}
+
+.chart-bar {
+  flex:          1;
+  background:    var(--green-dim);
+  border-top:    2px solid var(--green);
+  border-radius: 1px 1px 0 0;
+  transition:    background 0.2s;
+  position:      relative;
+  min-width:     2px;
+}
+
+.chart-bar:hover { background: rgba(29,185,84,0.3); }
+
+.chart-bar-tooltip {
+  display:       none;
+  position:      absolute;
+  bottom:        calc(100% + 6px);
+  left:          50%;
+  transform:     translateX(-50%);
+  background:    var(--surface2);
+  border:        1px solid var(--border);
+  padding:       4px 8px;
+  font-size:     0.65rem;
+  white-space:   nowrap;
+  z-index:       10;
+  pointer-events: none;
+}
+
+.chart-bar:hover .chart-bar-tooltip { display: block; }
+
+/* ─── EMPTY STATES ──────────────────────────────────────────*/
+.empty-state {
+  text-align:  center;
+  padding:     3rem;
+  color:       var(--muted);
+  font-size:   0.8rem;
+  line-height: 2;
+  background:  var(--surface);
+  border:      1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+/* ─── FOOTER ────────────────────────────────────────────────*/
+.app-footer {
+  border-top: 1px solid var(--border);
+  padding:    1.5rem 2rem;
+  font-size:  0.65rem;
+  color:      var(--muted);
+  text-align: center;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────*/
+@media (max-width: 600px) {
+  .content    { padding: 1rem; }
+  .time-tab   { padding: 0.6rem 0.75rem; font-size: 0.65rem; }
+  .artists-grid { grid-template-columns: repeat(2, 1fr); }
+  .track-item { grid-template-columns: 2rem 2.5rem 1fr; }
+  .track-plays { display: none; }
+}

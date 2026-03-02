@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tracked — Your Spotify Stats</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <!-- ─── LOADING SCREEN ──────────────────────────────────── -->
+  <!-- Shown briefly while we check if the user is logged in  -->
+  <div id="loading-screen">
+    <div class="loading-logo">Track<span>ed</span></div>
+    <div class="loading-bar"></div>
+  </div>
+
+  <!-- ─── LOGIN SCREEN ────────────────────────────────────── -->
+  <!-- Shown when no session is found                         -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">Track<span>ed</span></div>
+      <p class="login-tagline">Your complete Spotify history</p>
+
+      <button class="btn-login" onclick="API.login()">
+        <!-- Spotify logo SVG -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+        </svg>
+        Login with Spotify
+      </button>
+
+      <p class="login-note">
+        Tracked logs every song you play — building your complete history over time.<br>
+        Your data is stored privately in your own account.
+      </p>
+    </div>
+  </div>
+
+  <!-- ─── DASHBOARD ───────────────────────────────────────── -->
+  <!-- Shown when the user is logged in                       -->
+  <div id="dashboard">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-logo">Track<span>ed</span></div>
+      <div class="header-right">
+        <div class="user-info">
+          <img id="user-avatar" class="user-avatar" src="" alt="avatar">
+          <span id="user-name"></span>
+        </div>
+        <button class="btn-logout" onclick="Auth.logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Now Playing Bar (hidden until something is playing) -->
+    <div id="now-playing-bar">
+      <span class="np-label">Now Playing</span>
+      <img id="np-art" class="np-art" src="" alt="">
+      <span id="np-track" class="np-track"></span>
+      <span>—</span>
+      <span id="np-artist" class="np-artist"></span>
+    </div>
+
+    <!-- Time Range Tabs -->
+    <div class="time-tabs">
+      <button class="time-tab active" data-range="alltime"  onclick="Dashboard.setRange('alltime',  this)">All Time</button>
+      <button class="time-tab"        data-range="1year"    onclick="Dashboard.setRange('1year',    this)">1 Year</button>
+      <button class="time-tab"        data-range="6months"  onclick="Dashboard.setRange('6months',  this)">6 Months</button>
+      <button class="time-tab"        data-range="4weeks"   onclick="Dashboard.setRange('4weeks',   this)">4 Weeks</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="content">
+
+      <!-- Stats Strip -->
+      <div class="stats-strip" id="stats-strip">
+        <div class="stat-cell">
+          <span class="stat-value" id="stat-plays">—</span>
+          <span class="stat-label">Total Plays</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-value" id="stat-minutes">—</span>
+          <span class="stat-label">Minutes Listened</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-value" id="stat-artists">—</span>
+          <span class="stat-label">Artists</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-value" id="stat-since">—</span>
+          <span class="stat-label">Tracked Since</span>
+        </div>
+      </div>
+
+      <!-- Top Artists -->
+      <div class="section-header">
+        <h2 class="section-title">Top Artists</h2>
+        <span class="section-count" id="artists-count"></span>
+      </div>
+      <div id="artists-container">
+        <div class="empty-state">Loading artists...</div>
+      </div>
+
+      <!-- Top Tracks -->
+      <div class="section-header">
+        <h2 class="section-title">Top Tracks</h2>
+        <span class="section-count" id="tracks-count"></span>
+      </div>
+      <div id="tracks-container">
+        <div class="empty-state">Loading tracks...</div>
+      </div>
+
+      <!-- Listening Over Time -->
+      <div class="section-header">
+        <h2 class="section-title">Listening Over Time</h2>
+      </div>
+      <div class="chart-container">
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+
+      <!-- Recent Plays -->
+      <div class="section-header">
+        <h2 class="section-title">Recent Plays</h2>
+        <span class="section-count" id="recent-count"></span>
+      </div>
+      <div id="recent-container">
+        <div class="empty-state">Loading recent plays...</div>
+      </div>
+
+    </main>
+
+    <footer class="app-footer">
+      Tracked — built with the Spotify API · your data stays yours
+    </footer>
+
+  </div><!-- end #dashboard -->
+
+  <!-- ─── SCRIPTS ──────────────────────────────────────────── -->
+  <!-- Order matters — api.js must load before auth.js and
+       charts.js because they both depend on the API object  -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/import.js"></script>
+
+  <script>
+    // Start the app — checks login status and shows the right screen
+    Auth.init();
+  </script>
+
+</body>
+</html>
