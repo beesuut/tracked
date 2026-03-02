@@ -11,7 +11,9 @@ const SCOPES = [
   'user-read-currently-playing'
 ].join(' ');
 
-const REDIRECT_URI = `http://127.0.0.1:${process.env.PORT || 3000}/auth/callback`;
+const REDIRECT_URI = process.env.NODE_ENV === 'production'
+  ? `${process.env.BACKEND_URL}/auth/callback`
+  : `http://127.0.0.1:${process.env.PORT || 3000}/auth/callback`;
 
 router.get('/login', (req, res) => {
   const params = new URLSearchParams({
