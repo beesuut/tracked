@@ -51,3 +51,6 @@ app.listen(PORT, () => {
   └─────────────────────────────────────┘
   `);
 });
+
+const { startScrobbler } = require('./jobs/scrobbler');
+startScrobbler();
