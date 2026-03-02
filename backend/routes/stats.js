@@ -3,11 +3,18 @@ const router = express.Router();
 const db = require('../db/queries');
 const spotify = require('../utils/spotify');
 
-function requireAuth(req, res, next) {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Not logged in' });
+async function requireAuth(req, res, next) {
+  const token = req.headers['x-auth-token'];
+  if (!token) return res.status(401).json({ error: 'No token' });
+
+  try {
+    const userId = await db.getUserByToken(token);
+    if (!userId) return res.status(401).json({ error: 'Invalid token' });
+    req.userId = userId;  // make userId available to route handlers below
+    next();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  next();
 }
 
 router.use(requireAuth);
@@ -25,7 +32,7 @@ function sinceDate(range) {
 
 router.get('/overview', async (req, res) => {
   try {
-    const stats = await db.getOverviewStats(req.session.userId);
+    const stats = await db.getOverviewStats(req.userId);
     res.json(stats);
   } catch (err) {
     console.error('/stats/overview error:', err.message);
@@ -37,7 +44,7 @@ router.get('/top-tracks', async (req, res) => {
   try {
     const since = sinceDate(req.query.range || 'alltime');
     const limit = parseInt(req.query.limit) || 50;
-    const tracks = await db.getTopTracks(req.session.userId, limit, since);
+    const tracks = await db.getTopTracks(req.userId, limit, since);
     res.json(tracks);
   } catch (err) {
     console.error('/stats/top-tracks error:', err.message);
@@ -49,7 +56,7 @@ router.get('/top-artists', async (req, res) => {
   try {
     const since = sinceDate(req.query.range || 'alltime');
     const limit = parseInt(req.query.limit) || 20;
-    const artists = await db.getTopArtists(req.session.userId, limit, since);
+    const artists = await db.getTopArtists(req.userId, limit, since);
     res.json(artists);
   } catch (err) {
     console.error('/stats/top-artists error:', err.message);
@@ -60,7 +67,7 @@ router.get('/top-artists', async (req, res) => {
 router.get('/recent', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
-    const recent = await db.getRecentPlays(req.session.userId, limit);
+    const recent = await db.getRecentPlays(req.userId, limit);
     res.json(recent);
   } catch (err) {
     console.error('/stats/recent error:', err.message);
@@ -70,7 +77,7 @@ router.get('/recent', async (req, res) => {
 
 router.get('/over-time', async (req, res) => {
   try {
-    const data = await db.getPlaysOverTime(req.session.userId);
+    const data = await db.getPlaysOverTime(req.userId);
     res.json(data);
   } catch (err) {
     console.error('/stats/over-time error:', err.message);
@@ -80,7 +87,7 @@ router.get('/over-time', async (req, res) => {
 
 router.get('/now-playing', async (req, res) => {
   try {
-    const data = await spotify.getCurrentlyPlaying(req.session.userId);
+    const data = await spotify.getCurrentlyPlaying(req.userId);
 
     if (!data || !data.item) {
       return res.json({ is_playing: false });

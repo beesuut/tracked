@@ -232,6 +232,24 @@ async function getPlaysOverTime(userId) {
 
   return Object.entries(byMonth).map(([month, count]) => ({ month, count }));
 }
+async function saveSessionToken(userId, token) {
+  const { error } = await supabase
+    .from('session_tokens')
+    .upsert({ user_id: userId, token, created_at: new Date().toISOString() },
+      { onConflict: 'user_id' });
+  if (error) throw new Error(`saveSessionToken failed: ${error.message}`);
+}
+
+async function getUserByToken(token) {
+  const { data, error } = await supabase
+    .from('session_tokens')
+    .select('user_id')
+    .eq('token', token)
+    .single();
+  if (error?.code === 'PGRST116') return null;
+  if (error) throw new Error(`getUserByToken failed: ${error.message}`);
+  return data?.user_id || null;
+}
 
 module.exports = {
   upsertUser,
@@ -246,5 +264,7 @@ module.exports = {
   getTopTracks,
   getTopArtists,
   getRecentPlays,
-  getPlaysOverTime
+  getPlaysOverTime,
+  saveSessionToken,
+  getUserByToken
 };

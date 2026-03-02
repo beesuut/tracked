@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { exchangeCodeForTokens, getSpotifyProfile } = require('../utils/spotify');
-const { upsertUser, saveTokens, getUserById } = require('../db/queries');
+const { upsertUser, saveTokens, getUserById,
+  saveSessionToken, getUserByToken } = require('../db/queries');
 
 const SCOPES = [
   'user-read-private',
@@ -21,43 +23,32 @@ router.get('/login', (req, res) => {
     client_id: process.env.SPOTIFY_CLIENT_ID,
     scope: SCOPES,
     redirect_uri: REDIRECT_URI,
-    state: Math.random().toString(36).substring(7)
+    state: crypto.randomBytes(8).toString('hex')
   });
-
   res.redirect(`https://accounts.spotify.com/authorize?${params}`);
 });
 
 router.get('/callback', async (req, res) => {
   const { code, error } = req.query;
 
-  if (error) {
-    console.error('Spotify auth denied:', error);
+  if (error || !code) {
     return res.redirect(`${process.env.FRONTEND_URL}?error=access_denied`);
-  }
-
-  if (!code) {
-    return res.redirect(`${process.env.FRONTEND_URL}?error=no_code`);
   }
 
   try {
     const tokenData = await exchangeCodeForTokens(code, REDIRECT_URI);
-
     const spotifyProfile = await getSpotifyProfile(tokenData.access_token);
-
     const user = await upsertUser(spotifyProfile);
 
-    await saveTokens(
-      user.id,
-      tokenData.access_token,
-      tokenData.refresh_token,
-      tokenData.expires_in
-    );
+    await saveTokens(user.id, tokenData.access_token,
+      tokenData.refresh_token, tokenData.expires_in);
 
-    req.session.userId = user.id;
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    await saveSessionToken(user.id, sessionToken);
 
-    console.log(`User logged in: ${spotifyProfile.display_name} (${user.id})`);
+    console.log(`User logged in: ${spotifyProfile.display_name}`);
 
-    res.redirect(`${process.env.FRONTEND_URL}?login=success`);
+    res.redirect(`${process.env.FRONTEND_URL}?token=${sessionToken}`);
 
   } catch (err) {
     console.error('Auth callback error:', err.message);
@@ -66,12 +57,14 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/me', async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Not logged in' });
-  }
+  const token = req.headers['x-auth-token'];
+  if (!token) return res.status(401).json({ error: 'No token' });
 
   try {
-    const user = await getUserById(req.session.userId);
+    const userId = await getUserByToken(token);
+    if (!userId) return res.status(401).json({ error: 'Invalid token' });
+
+    const user = await getUserById(userId);
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -79,7 +72,6 @@ router.get('/me', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  req.session.destroy();
   res.json({ message: 'Logged out' });
 });
 
